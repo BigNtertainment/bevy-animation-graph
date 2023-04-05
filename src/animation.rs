@@ -36,6 +36,7 @@ impl AnimationBounds {
 #[derive(Component, Debug, Default, Clone, Reflect)]
 #[reflect(Component)]
 pub struct Animation {
+    pub active: bool,
     pub atlas: Handle<TextureAtlas>,
     pub bounds: AnimationBounds,
     timer: Timer,
@@ -50,13 +51,14 @@ impl Animation {
             bounds,
             timer: Timer::new(frame_duration, TimerMode::Repeating),
             mode,
+            active: true,
             finished: false
         }
     }
 }
 
 fn perform_animations(mut query: Query<(&mut Animation, &mut TextureAtlasSprite)>, time: Res<Time>) {
-    for (mut animation, mut sprite) in query.iter_mut().filter(|(anim, _)| !anim.finished) {
+    for (mut animation, mut sprite) in query.iter_mut().filter(|(anim, _)| !anim.finished && anim.active) {
         animation.timer.tick(time.delta());
 
         if animation.timer.just_finished() {

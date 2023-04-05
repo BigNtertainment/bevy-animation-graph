@@ -2,6 +2,7 @@ use animation::AnimationPlugin;
 use bevy::prelude::*;
 
 pub mod animation;
+pub mod animation_manager;
 
 pub struct SpritesheetAnimationPlugin;
 
