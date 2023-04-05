@@ -11,3 +11,7 @@ bevy = "0.10"
 [[example]]
 name = "simple_animation"
 path = "examples/simple_animation.rs"
+
+[[example]]
+name = "animation_graph"
+path = "examples/animation_graph.rs"
