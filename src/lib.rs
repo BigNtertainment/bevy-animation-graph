@@ -3,6 +3,7 @@ use bevy::prelude::*;
 
 pub mod animation;
 pub mod animation_manager;
+pub mod animation_graph;
 
 pub struct SpritesheetAnimationPlugin;
 

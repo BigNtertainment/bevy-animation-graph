@@ -1,49 +1,12 @@
 use bevy::{prelude::*, utils::{HashMap, Entry}};
 
-use crate::animation::Animation;
-
-#[derive(Debug)]
-pub struct AnimationGraphEdge {
-    condition: String, 
-    neighbour_index: usize,
-}
-
-#[derive(Debug)]
-pub struct AnimationGraphNode<'a> {
-    value: &'a mut Animation,
-    edges: Vec<AnimationGraphEdge>
-}
-
-impl<'a> AnimationGraphNode<'a> {
-    fn new(animation: &'a mut Animation) -> Self {
-        Self {
-            value: animation,
-            edges: vec![],
-        }
-    }
-}
-
-#[derive(Debug)]
-pub struct AnimationGraph<'a> {
-    nodes: Vec<AnimationGraphNode<'a>>,
-}
-
-impl<'a> AnimationGraph<'a> {
-    pub fn new(nodes: Vec<AnimationGraphNode<'a>>) -> Self {
-        Self {
-            nodes
-        }
-    }
-
-    pub fn add_edge(&mut self, start_index: usize, end_index: usize, condition: String) {
-        self.nodes[start_index].edges.push(AnimationGraphEdge { condition, neighbour_index: end_index });
-    }
-}
+use crate::{animation::Animation, animation_graph::{AnimationGraph, AnimationGraphNode}};
 
 #[derive(Component, Debug)]
-pub struct AnimationManager<'a> {
+pub struct AnimationManager {
     state: HashMap<String, bool>,
-    graph: AnimationGraph<'a>,
+    graph: AnimationGraph,
+    current_anim_timer: Timer,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -53,11 +16,12 @@ pub enum AnimationManagerErr {
     },
 }
 
-impl<'a> AnimationManager<'a> {
-    pub fn new(nodes: Vec<&'a mut Animation>) -> Self {
+impl AnimationManager {
+    pub fn new(nodes: Vec<Animation>) -> Self {
         Self {
             state: HashMap::new(),
             graph: AnimationGraph::new(nodes.iter().map(|node| AnimationGraphNode::new(*node)).collect()),
+            current_anim_timer: Timer::from_seconds(0., TimerMode::Once),
         }
     }
 
@@ -76,5 +40,20 @@ impl<'a> AnimationManager<'a> {
 
     pub fn get_state(&self, name: String) -> Option<bool> {
         self.state.get(&name).map(|state| *state)
+    }
+}
+
+fn perform_animations(mut query: Query<(&mut AnimationManager, &mut TextureAtlasSprite)>, time: Res<Time>) {
+    for (mut animation_manager, mut sprite) in query.iter_mut() {
+        animation_manager.current_anim_timer.tick(time.delta());
+
+        if animation.timer.just_finished() {
+            if sprite.index == animation.bounds.last_frame_index {
+                animation.finished = true;
+                continue;
+            } else {
+                sprite.index += 1;
+            };
+        }
     }
 }

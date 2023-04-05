@@ -26,6 +26,6 @@ fn setup(
             sprite: TextureAtlasSprite::new(animation_bounds.first_frame_index),
             ..default()
         },
-        Animation::new(texture_atlas_handle, animation_bounds, Duration::from_secs_f32(0.2), AnimationMode::Repeating),
+        Animation::new(texture_atlas_handle, animation_bounds, Duration::from_secs_f32(0.2),
     ));
 }
