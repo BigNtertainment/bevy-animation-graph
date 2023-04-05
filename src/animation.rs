@@ -2,8 +2,6 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-pub struct AnimationPlugin;
-
 #[derive(Debug, Default, Clone, Copy, Reflect, PartialEq, Eq)]
 pub struct AnimationBounds {
     pub first_frame_index: usize,
@@ -24,8 +22,7 @@ pub struct Animation {
     pub active: bool,
     pub atlas: Handle<TextureAtlas>,
     pub bounds: AnimationBounds,
-    frame_duration: Duration,
-    finished: bool,
+    pub frame_duration: Duration,
 }
 
 impl Animation {
@@ -35,7 +32,6 @@ impl Animation {
             bounds,
             frame_duration,
             active: true,
-            finished: false
         }
     }
 }

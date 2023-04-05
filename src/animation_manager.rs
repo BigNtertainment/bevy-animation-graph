@@ -1,27 +1,50 @@
-use bevy::{prelude::*, utils::{HashMap, Entry}};
+use bevy::{
+    prelude::*,
+    utils::{Entry, HashMap},
+};
 
-use crate::{animation::Animation, animation_graph::{AnimationGraph, AnimationGraphNode}};
+use crate::{
+    animation::Animation,
+    animation_graph::{
+        AnimationGraph, AnimationGraphNode, AnimationTransitionCondition, AnimationTransitionMode,
+    },
+};
+
+pub struct AnimationManagerPlugin;
+
+impl Plugin for AnimationManagerPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems((perform_animations, transition_animations).chain());
+    }
+}
 
 #[derive(Component, Debug)]
 pub struct AnimationManager {
     state: HashMap<String, bool>,
     graph: AnimationGraph,
-    current_anim_timer: Timer,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AnimationManagerErr {
-    UnknownState {
-        name: String
-    },
+    UnknownState { name: String },
 }
 
 impl AnimationManager {
-    pub fn new(nodes: Vec<Animation>) -> Self {
+    pub fn new(nodes: Vec<Animation>, start_node: usize) -> Self {
+        let mut graph = AnimationGraph::new(
+            nodes
+                .into_iter()
+                .map(|node| AnimationGraphNode::new(node))
+                .collect(),
+        );
+
+        assert!(start_node < graph.nodes.len(), "Start node index is out of bounds");
+
+        graph.set_active_node(start_node);
+
         Self {
             state: HashMap::new(),
-            graph: AnimationGraph::new(nodes.iter().map(|node| AnimationGraphNode::new(*node)).collect()),
-            current_anim_timer: Timer::from_seconds(0., TimerMode::Once),
+            graph,
         }
     }
 
@@ -32,8 +55,9 @@ impl AnimationManager {
     pub fn set_state(&mut self, name: String, value: bool) -> Result<(), AnimationManagerErr> {
         match self.state.entry(name.clone()) {
             Entry::Vacant(..) => Err(AnimationManagerErr::UnknownState { name }),
-            Entry::Occupied(entry) => Ok(entry)
-        }?.replace_entry(value);
+            Entry::Occupied(entry) => Ok(entry),
+        }?
+        .replace_entry(value);
 
         Ok(())
     }
@@ -41,19 +65,96 @@ impl AnimationManager {
     pub fn get_state(&self, name: String) -> Option<bool> {
         self.state.get(&name).map(|state| *state)
     }
+
+    fn is_condition_met(&self, condition: &AnimationTransitionCondition) -> bool {
+        if condition.mode == AnimationTransitionMode::AfterFinish {
+            if !self.graph.active_animation_finished {
+                return false;
+            }
+        }
+
+        if let Some(state) = &condition.state {
+            match self.state.get(state) {
+                Some(state) => {
+                    if condition.negative {
+                        !state
+                    } else {
+                        *state
+                    }
+                }
+                None => false,
+            }
+        } else {
+            !condition.negative
+        }
+    }
+
+    pub fn add_graph_edge(
+        &mut self,
+        start_index: usize,
+        end_index: usize,
+        condition: AnimationTransitionCondition,
+    ) {
+        self.graph.add_edge(start_index, end_index, condition);
+    }
 }
 
-fn perform_animations(mut query: Query<(&mut AnimationManager, &mut TextureAtlasSprite)>, time: Res<Time>) {
+fn perform_animations(
+    mut query: Query<(&mut AnimationManager, &mut TextureAtlasSprite)>,
+    time: Res<Time>,
+) {
     for (mut animation_manager, mut sprite) in query.iter_mut() {
-        animation_manager.current_anim_timer.tick(time.delta());
+        if animation_manager.graph.active_animation_finished {
+            continue;
+        }
 
-        if animation.timer.just_finished() {
-            if sprite.index == animation.bounds.last_frame_index {
-                animation.finished = true;
+        animation_manager
+            .graph
+            .active_animation_timer
+            .tick(time.delta());
+
+        if animation_manager
+            .graph
+            .active_animation_timer
+            .just_finished()
+        {
+            if sprite.index
+                == animation_manager
+                    .graph
+                    .active_animation()
+                    .bounds
+                    .last_frame_index
+            {
+                animation_manager.graph.active_animation_finished = true;
                 continue;
             } else {
                 sprite.index += 1;
             };
+        }
+    }
+}
+
+fn transition_animations(mut query: Query<(&mut AnimationManager, &mut TextureAtlasSprite)>) {
+    for (mut animation_manager, mut sprite) in query.iter_mut() {
+        let active_node_index = animation_manager.graph.active;
+        let edges = &animation_manager.graph.nodes[active_node_index]
+            .edges
+            .clone();
+
+        for edge in edges.iter() {
+            if animation_manager.is_condition_met(&edge.condition) {
+                animation_manager
+                    .graph
+                    .set_active_node(edge.neighbour_index);
+
+                sprite.index = animation_manager
+                    .graph
+                    .active_animation()
+                    .bounds
+                    .first_frame_index;
+
+                break;
+            }
         }
     }
 }

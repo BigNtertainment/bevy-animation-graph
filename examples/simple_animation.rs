@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
-use bevy_spritesheet_animation::{SpritesheetAnimationPlugin, animation::{AnimationBounds, Animation, AnimationMode}};
+use bevy_spritesheet_animation::{SpritesheetAnimationPlugin, animation::{AnimationBounds, Animation}, animation_manager::AnimationManager, animation_graph::AnimationTransitionCondition};
 
 fn main() {
     App::new().add_plugins(DefaultPlugins).add_plugin(SpritesheetAnimationPlugin).add_startup_system(setup).run();
@@ -20,12 +20,19 @@ fn setup(
     let animation_bounds = AnimationBounds::new(0, 3);
 
     commands.spawn(Camera2dBundle::default());
+
+    let mut animation_manager = AnimationManager::new(vec![
+        Animation::new(texture_atlas_handle.clone(), animation_bounds, Duration::from_millis(500)),
+    ], 0);
+
+    animation_manager.add_graph_edge(0, 0, AnimationTransitionCondition::new(None));
+
     commands.spawn((
         SpriteSheetBundle {
             texture_atlas: texture_atlas_handle.clone(),
             sprite: TextureAtlasSprite::new(animation_bounds.first_frame_index),
             ..default()
         },
-        Animation::new(texture_atlas_handle, animation_bounds, Duration::from_secs_f32(0.2),
+        animation_manager,
     ));
 }
