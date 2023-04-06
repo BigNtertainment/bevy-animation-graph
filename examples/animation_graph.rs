@@ -97,7 +97,6 @@ fn setup(
 fn climbing(mut player_query: Query<&mut AnimationManager>, keyboard_input: Res<Input<KeyCode>>) {
 	let mut animation_manager = player_query.single_mut();
 	animation_manager.set_state("climbing".to_string(), keyboard_input.pressed(KeyCode::W)).unwrap();
-	println!("{}", animation_manager.get_state("climbing".to_string()).unwrap());
 }
 
 fn jumping(mut player_query: Query<&mut AnimationManager>, keyboard_input: Res<Input<KeyCode>>) {

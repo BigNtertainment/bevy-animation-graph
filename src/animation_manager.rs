@@ -138,23 +138,31 @@ fn transition_animations(mut query: Query<(&mut AnimationManager, &mut TextureAt
     for (mut animation_manager, mut sprite) in query.iter_mut() {
         let active_node_index = animation_manager.graph.active;
         let edges = &animation_manager.graph.nodes[active_node_index]
-            .edges
-            .clone();
+            .edges;
 
-        for edge in edges.iter() {
-            if animation_manager.is_condition_met(&edge.condition) {
-                animation_manager
-                    .graph
-                    .set_active_node(edge.neighbour_index);
+        let next_index = {
+            let mut result = None;
 
-                sprite.index = animation_manager
-                    .graph
-                    .active_animation()
-                    .bounds
-                    .first_frame_index;
-
-                break;
+            for edge in edges.iter() {
+                if animation_manager.is_condition_met(&edge.condition) {
+                    result = Some(edge.neighbour_index);
+                    break;
+                }
             }
+
+            result
+        };
+
+        if let Some(next_index) = next_index {
+            animation_manager
+                .graph
+                .set_active_node(next_index);
+            
+            sprite.index = animation_manager
+                .graph
+                .active_animation()
+                .bounds
+                .first_frame_index;
         }
     }
 }
