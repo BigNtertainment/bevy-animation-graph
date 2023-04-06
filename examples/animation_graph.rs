@@ -34,19 +34,16 @@ fn setup(
         vec![
             // Idle
             Animation::new(
-                texture_atlas_handle.clone(),
                 AnimationBounds::new(0, 3),
                 Duration::from_millis(500),
             ),
             // Climbing
             Animation::new(
-                texture_atlas_handle.clone(),
                 AnimationBounds::new(5, 6),
                 Duration::from_millis(300),
             ),
             // Jumping
             Animation::new(
-                texture_atlas_handle.clone(),
                 AnimationBounds::new(7, 8),
                 Duration::from_millis(500),
             ),

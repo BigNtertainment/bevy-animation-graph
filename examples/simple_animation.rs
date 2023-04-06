@@ -22,7 +22,7 @@ fn setup(
     commands.spawn(Camera2dBundle::default());
 
     let mut animation_manager = AnimationManager::new(vec![
-        Animation::new(texture_atlas_handle.clone(), animation_bounds, Duration::from_millis(500)),
+        Animation::new(animation_bounds, Duration::from_millis(500)),
     ], 0);
 
     animation_manager.add_graph_edge(0, 0, AnimationTransitionCondition::new(None));

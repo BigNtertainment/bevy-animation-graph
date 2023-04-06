@@ -20,15 +20,13 @@ impl AnimationBounds {
 #[derive(Debug, Default, Clone, Reflect)]
 pub struct Animation {
     pub active: bool,
-    pub atlas: Handle<TextureAtlas>,
     pub bounds: AnimationBounds,
     pub frame_duration: Duration,
 }
 
 impl Animation {
-    pub fn new(atlas: Handle<TextureAtlas>, bounds: AnimationBounds, frame_duration: Duration) -> Self {
+    pub fn new(bounds: AnimationBounds, frame_duration: Duration) -> Self {
         Self {
-            atlas,
             bounds,
             frame_duration,
             active: true,

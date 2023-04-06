@@ -20,6 +20,7 @@ impl Plugin for AnimationManagerPlugin {
 
 #[derive(Component, Debug)]
 pub struct AnimationManager {
+    // TODO: Add support for different types of state
     state: HashMap<String, bool>,
     graph: AnimationGraph,
 }
@@ -103,6 +104,8 @@ fn perform_animations(
     mut query: Query<(&mut AnimationManager, &mut TextureAtlasSprite)>,
     time: Res<Time>,
 ) {
+    // TODO: Handling animations using different texture atlases
+
     for (mut animation_manager, mut sprite) in query.iter_mut() {
         if animation_manager.graph.active_animation_finished {
             continue;
