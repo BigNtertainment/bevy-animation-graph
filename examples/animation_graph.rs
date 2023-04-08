@@ -13,7 +13,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(SpritesheetAnimationPlugin)
         .add_startup_system(setup)
-		.add_systems((climbing, jumping))
+        .add_systems((climbing, jumping))
         .run();
 }
 
@@ -33,53 +33,47 @@ fn setup(
     let mut animation_manager = AnimationManager::new(
         vec![
             // Idle
-            Animation::new(
-                AnimationBounds::new(0, 3),
-                Duration::from_millis(500),
-            ),
+            Animation::new(AnimationBounds::new(0, 3), Duration::from_millis(500)),
             // Climbing
-            Animation::new(
-                AnimationBounds::new(5, 6),
-                Duration::from_millis(300),
-            ),
+            Animation::new(AnimationBounds::new(5, 6), Duration::from_millis(300)),
             // Jumping
-            Animation::new(
-                AnimationBounds::new(7, 8),
-                Duration::from_millis(500),
-            ),
+            Animation::new(AnimationBounds::new(7, 8), Duration::from_millis(500)),
         ],
         0,
     );
 
-	animation_manager.add_state("climbing".to_string(), false);
-	animation_manager.add_state("jumping".to_string(), false);
+    animation_manager.add_state("climbing".to_string(), false);
+    animation_manager.add_state("jumping".to_string(), false);
 
     animation_manager.add_graph_edge(
         0,
         1,
-        AnimationTransitionCondition::new(Some("climbing".to_string())),
+        AnimationTransitionCondition::new(Box::new(|state| state["climbing"])),
+    );
+    animation_manager.add_graph_edge(
+        1,
+        1,
+        AnimationTransitionCondition::new(Box::new(|state| state["climbing"])),
     );
     animation_manager.add_graph_edge(
         1,
         0,
-        AnimationTransitionCondition::new(Some("climbing".to_string())).negative(),
+        AnimationTransitionCondition::new(Box::new(|state| !state["climbing"])),
     );
     animation_manager.add_graph_edge(
         0,
         2,
-        AnimationTransitionCondition::new(Some("jumping".to_string())).with_mode(AnimationTransitionMode::Immediate),
+        AnimationTransitionCondition::new(Box::new(|state| state["jumping"]))
+            .with_mode(AnimationTransitionMode::Immediate),
     );
     animation_manager.add_graph_edge(
         1,
         2,
-        AnimationTransitionCondition::new(Some("jumping".to_string())).with_mode(AnimationTransitionMode::Immediate),
+        AnimationTransitionCondition::new(Box::new(|state| state["jumping"]))
+            .with_mode(AnimationTransitionMode::Immediate),
     );
-    animation_manager.add_graph_edge(
-        2,
-        0,
-        AnimationTransitionCondition::new(None),
-    );
-    animation_manager.add_graph_edge(0, 0, AnimationTransitionCondition::new(None));
+    animation_manager.add_graph_edge(2, 0, AnimationTransitionCondition::new(Box::new(|_| true)));
+    animation_manager.add_graph_edge(0, 0, AnimationTransitionCondition::new(Box::new(|_| true)));
 
     commands.spawn((
         SpriteSheetBundle {
@@ -92,11 +86,18 @@ fn setup(
 }
 
 fn climbing(mut player_query: Query<&mut AnimationManager>, keyboard_input: Res<Input<KeyCode>>) {
-	let mut animation_manager = player_query.single_mut();
-	animation_manager.set_state("climbing".to_string(), keyboard_input.pressed(KeyCode::W)).unwrap();
+    let mut animation_manager = player_query.single_mut();
+    animation_manager
+        .set_state("climbing".to_string(), keyboard_input.pressed(KeyCode::W))
+        .unwrap();
 }
 
 fn jumping(mut player_query: Query<&mut AnimationManager>, keyboard_input: Res<Input<KeyCode>>) {
-	let mut animation_manager = player_query.single_mut();
-	animation_manager.set_state("jumping".to_string(), keyboard_input.pressed(KeyCode::Space)).unwrap();
+    let mut animation_manager = player_query.single_mut();
+    animation_manager
+        .set_state(
+            "jumping".to_string(),
+            keyboard_input.pressed(KeyCode::Space),
+        )
+        .unwrap();
 }

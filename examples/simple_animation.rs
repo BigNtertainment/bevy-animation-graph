@@ -25,7 +25,7 @@ fn setup(
         Animation::new(animation_bounds, Duration::from_millis(500)),
     ], 0);
 
-    animation_manager.add_graph_edge(0, 0, AnimationTransitionCondition::new(None));
+    animation_manager.add_graph_edge(0, 0, AnimationTransitionCondition::new(Box::new(|_| true)));
 
     commands.spawn((
         SpriteSheetBundle {

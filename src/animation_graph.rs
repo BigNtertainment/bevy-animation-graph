@@ -1,4 +1,9 @@
-use bevy::time::{Timer, TimerMode};
+use std::fmt::{Debug, Formatter};
+
+use bevy::{
+    time::{Timer, TimerMode},
+    utils::HashMap,
+};
 
 use crate::animation::Animation;
 
@@ -9,47 +14,43 @@ pub enum AnimationTransitionMode {
     Immediate,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+pub type Condition = Box<dyn Fn(&HashMap<String, bool>) -> bool + Send + Sync>;
+
 pub struct AnimationTransitionCondition {
-    pub state: Option<String>,
+    pub condition: Condition,
     pub mode: AnimationTransitionMode,
-    pub negative: bool,
 }
 
 impl AnimationTransitionCondition {
-    pub fn new(state: Option<String>) -> Self {
+    pub fn new(condition: Condition) -> Self {
         Self {
-            state,
+            condition,
             mode: AnimationTransitionMode::AfterFinish,
-            negative: false,
         }
     }
 
     pub fn with_mode(self, mode: AnimationTransitionMode) -> Self {
-        Self {
-            mode,
-            ..self
-        }
-    }
-
-    pub fn negative(self) -> Self {
-        Self {
-            negative: true,
-            ..self
-        }
+        Self { mode, ..self }
     }
 }
 
-#[derive(Debug, Clone)]
 pub struct AnimationGraphEdge {
-    pub(crate) condition: AnimationTransitionCondition, 
+    pub(crate) condition: AnimationTransitionCondition,
     pub(crate) neighbour_index: usize,
+}
+
+impl Debug for AnimationGraphEdge {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AnimationGraphEdge")
+            .field("neighbour_index", &self.neighbour_index)
+            .finish()
+    }
 }
 
 #[derive(Debug)]
 pub struct AnimationGraphNode {
     pub(crate) value: Animation,
-    pub(crate) edges: Vec<AnimationGraphEdge>
+    pub(crate) edges: Vec<AnimationGraphEdge>,
 }
 
 impl AnimationGraphNode {
@@ -79,8 +80,16 @@ impl AnimationGraph {
         }
     }
 
-    pub fn add_edge(&mut self, start_index: usize, end_index: usize, condition: AnimationTransitionCondition) {
-        self.nodes[start_index].edges.push(AnimationGraphEdge { condition, neighbour_index: end_index });
+    pub fn add_edge(
+        &mut self,
+        start_index: usize,
+        end_index: usize,
+        condition: AnimationTransitionCondition,
+    ) {
+        self.nodes[start_index].edges.push(AnimationGraphEdge {
+            condition,
+            neighbour_index: end_index,
+        });
     }
 
     pub fn active_animation(&self) -> &Animation {
@@ -88,11 +97,11 @@ impl AnimationGraph {
     }
 
     pub(crate) fn set_active_node(&mut self, index: usize) {
+        println!("setting animation to: {}", index);
+
         self.active = index;
-        self.active_animation_timer = Timer::new(
-            self.active_animation().frame_duration,
-            TimerMode::Repeating,
-        );
+        self.active_animation_timer =
+            Timer::new(self.active_animation().frame_duration, TimerMode::Repeating);
         self.active_animation_finished = false;
     }
 }

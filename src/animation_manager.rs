@@ -74,20 +74,7 @@ impl AnimationManager {
             }
         }
 
-        if let Some(state) = &condition.state {
-            match self.state.get(state) {
-                Some(state) => {
-                    if condition.negative {
-                        !state
-                    } else {
-                        *state
-                    }
-                }
-                None => false,
-            }
-        } else {
-            !condition.negative
-        }
+        (condition.condition)(&self.state)
     }
 
     pub fn add_graph_edge(
