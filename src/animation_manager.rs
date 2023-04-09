@@ -124,7 +124,7 @@ fn perform_animations(
     }
 }
 
-fn transition_animations(mut query: Query<(&mut AnimationManager, &mut TextureAtlasSprite)>) {
+pub fn transition_animations(mut query: Query<(&mut AnimationManager, &mut TextureAtlasSprite)>) {
     for (mut animation_manager, mut sprite) in query.iter_mut() {
         let active_node_index = animation_manager.graph.active;
         let edges = &animation_manager.graph.nodes[active_node_index]
