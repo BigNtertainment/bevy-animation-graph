@@ -13,16 +13,14 @@ use crate::{
 pub struct AnimationManagerPlugin;
 
 impl Plugin for AnimationManagerPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems((perform_animations, transition_animations).chain());
-    }
+    fn build(&self, _app: &mut App) {}
 }
 
 #[derive(Component, Debug)]
-pub struct AnimationManager {
+pub struct AnimationManager<T: Animation> {
     // TODO: Add support for different types of state
     state: HashMap<String, bool>,
-    graph: AnimationGraph,
+    graph: AnimationGraph<T>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -30,8 +28,8 @@ pub enum AnimationManagerErr {
     UnknownState { name: String },
 }
 
-impl AnimationManager {
-    pub fn new(nodes: Vec<Animation>, start_node: usize) -> Self {
+impl<T: Animation> AnimationManager<T> {
+    pub fn new(nodes: Vec<T>, start_node: usize) -> Self {
         let mut graph = AnimationGraph::new(
             nodes
                 .into_iter()
@@ -39,7 +37,10 @@ impl AnimationManager {
                 .collect(),
         );
 
-        assert!(start_node < graph.nodes.len(), "Start node index is out of bounds");
+        assert!(
+            start_node < graph.nodes.len(),
+            "Start node index is out of bounds"
+        );
 
         graph.set_active_node(start_node);
 
@@ -68,12 +69,6 @@ impl AnimationManager {
     }
 
     fn is_condition_met(&self, condition: &AnimationTransitionCondition) -> bool {
-        if condition.mode == AnimationTransitionMode::AfterFinish {
-            if !self.graph.active_animation_finished {
-                return false;
-            }
-        }
-
         (condition.condition)(&self.state)
     }
 
@@ -87,54 +82,32 @@ impl AnimationManager {
     }
 }
 
-fn perform_animations(
-    mut query: Query<(&mut AnimationManager, &mut TextureAtlasSprite)>,
-    time: Res<Time>,
+pub fn transition_animations<T: Animation>(
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut AnimationManager<T>, Option<&T>)>,
 ) {
-    // TODO: Handling animations using different texture atlases
-
-    for (mut animation_manager, mut sprite) in query.iter_mut() {
-        if animation_manager.graph.active_animation_finished {
-            continue;
+    for (entity, mut animation_manager, animation) in query.iter_mut() {
+        if animation.is_none() {
+            commands
+                .entity(entity)
+                .insert(animation_manager.graph.active_animation().clone());
+            return;
         }
 
-        animation_manager
-            .graph
-            .active_animation_timer
-            .tick(time.delta());
+        let animation = animation.unwrap();
 
-        if animation_manager
-            .graph
-            .active_animation_timer
-            .just_finished()
-        {
-            if sprite.index
-                == animation_manager
-                    .graph
-                    .active_animation()
-                    .bounds
-                    .last_frame_index
-            {
-                animation_manager.graph.active_animation_finished = true;
-                continue;
-            } else {
-                sprite.index += 1;
-            };
-        }
-    }
-}
-
-pub fn transition_animations(mut query: Query<(&mut AnimationManager, &mut TextureAtlasSprite)>) {
-    for (mut animation_manager, mut sprite) in query.iter_mut() {
         let active_node_index = animation_manager.graph.active;
-        let edges = &animation_manager.graph.nodes[active_node_index]
-            .edges;
+        let edges = &animation_manager.graph.nodes[active_node_index].edges;
 
         let next_index = {
             let mut result = None;
 
             for edge in edges.iter() {
-                if animation_manager.is_condition_met(&edge.condition) {
+                if (edge.condition.mode == AnimationTransitionMode::Immediate
+                    || (edge.condition.mode == AnimationTransitionMode::AfterFinish
+                        && animation.finished()))
+                    && animation_manager.is_condition_met(&edge.condition)
+                {
                     result = Some(edge.neighbour_index);
                     break;
                 }
@@ -144,15 +117,11 @@ pub fn transition_animations(mut query: Query<(&mut AnimationManager, &mut Textu
         };
 
         if let Some(next_index) = next_index {
-            animation_manager
-                .graph
-                .set_active_node(next_index);
-            
-            sprite.index = animation_manager
-                .graph
-                .active_animation()
-                .bounds
-                .first_frame_index;
+            animation_manager.graph.set_active_node(next_index);
+
+            commands
+                .entity(entity)
+                .insert(animation_manager.graph.active_animation().clone());
         }
     }
 }

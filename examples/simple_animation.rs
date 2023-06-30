@@ -1,10 +1,10 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
-use bevy_spritesheet_animation::{SpritesheetAnimationPlugin, animation::{AnimationBounds, Animation}, animation_manager::AnimationManager, animation_graph::AnimationTransitionCondition};
+use bevy_spritesheet_animation::{AnimationGraphPlugin, animation_manager::AnimationManager, animation_graph::AnimationTransitionCondition, spritesheet_animation::{AnimationBounds, SpritesheetAnimation}};
 
 fn main() {
-    App::new().add_plugins(DefaultPlugins).add_plugin(SpritesheetAnimationPlugin).add_startup_system(setup).run();
+    App::new().add_plugins(DefaultPlugins).add_plugin(AnimationGraphPlugin).add_startup_system(setup).run();
 }
 
 fn setup(
@@ -22,7 +22,7 @@ fn setup(
     commands.spawn(Camera2dBundle::default());
 
     let mut animation_manager = AnimationManager::new(vec![
-        Animation::new(animation_bounds, Duration::from_millis(500)),
+        SpritesheetAnimation::new(animation_bounds, Duration::from_millis(500)),
     ], 0);
 
     animation_manager.add_graph_edge(0, 0, AnimationTransitionCondition::new(Box::new(|_| true)));

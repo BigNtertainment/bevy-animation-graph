@@ -1,9 +1,6 @@
 use std::fmt::{Debug, Formatter};
 
-use bevy::{
-    time::{Timer, TimerMode},
-    utils::HashMap,
-};
+use bevy::utils::HashMap;
 
 use crate::animation::Animation;
 
@@ -48,13 +45,13 @@ impl Debug for AnimationGraphEdge {
 }
 
 #[derive(Debug)]
-pub struct AnimationGraphNode {
-    pub(crate) value: Animation,
+pub struct AnimationGraphNode<T: Animation> {
+    pub(crate) value: T,
     pub(crate) edges: Vec<AnimationGraphEdge>,
 }
 
-impl AnimationGraphNode {
-    pub fn new(animation: Animation) -> Self {
+impl<T: Animation> AnimationGraphNode<T> {
+    pub fn new(animation: T) -> Self {
         Self {
             value: animation,
             edges: vec![],
@@ -63,20 +60,16 @@ impl AnimationGraphNode {
 }
 
 #[derive(Debug)]
-pub struct AnimationGraph {
-    pub(crate) nodes: Vec<AnimationGraphNode>,
+pub struct AnimationGraph<T: Animation> {
+    pub(crate) nodes: Vec<AnimationGraphNode<T>>,
     pub(crate) active: usize,
-    pub(crate) active_animation_timer: Timer,
-    pub(crate) active_animation_finished: bool,
 }
 
-impl AnimationGraph {
-    pub fn new(nodes: Vec<AnimationGraphNode>) -> Self {
+impl<T: Animation> AnimationGraph<T> {
+    pub fn new(nodes: Vec<AnimationGraphNode<T>>) -> Self {
         Self {
             nodes,
             active: 0,
-            active_animation_timer: Timer::from_seconds(0., TimerMode::Repeating),
-            active_animation_finished: false,
         }
     }
 
@@ -92,16 +85,11 @@ impl AnimationGraph {
         });
     }
 
-    pub fn active_animation(&self) -> &Animation {
+    pub fn active_animation(&self) -> &T {
         &self.nodes[self.active].value
     }
 
     pub(crate) fn set_active_node(&mut self, index: usize) {
-        println!("setting animation to: {}", index);
-
         self.active = index;
-        self.active_animation_timer =
-            Timer::new(self.active_animation().frame_duration, TimerMode::Repeating);
-        self.active_animation_finished = false;
     }
 }
