@@ -2,8 +2,6 @@ use std::fmt::{Debug, Formatter};
 
 use bevy::utils::HashMap;
 
-use crate::animation::Animation;
-
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum AnimationTransitionMode {
     #[default]
@@ -44,31 +42,35 @@ impl Debug for AnimationGraphEdge {
     }
 }
 
-#[derive(Debug)]
-pub struct AnimationGraphNode<T: Animation> {
-    pub(crate) value: T,
+#[derive(Debug, Default)]
+pub struct AnimationGraphNode {
     pub(crate) edges: Vec<AnimationGraphEdge>,
 }
 
-impl<T: Animation> AnimationGraphNode<T> {
-    pub fn new(animation: T) -> Self {
+impl AnimationGraphNode {
+    pub fn new() -> Self {
         Self {
-            value: animation,
             edges: vec![],
         }
     }
 }
 
-#[derive(Debug)]
-pub struct AnimationGraph<T: Animation> {
-    pub(crate) nodes: Vec<AnimationGraphNode<T>>,
+#[derive(Debug, Default)]
+pub struct AnimationGraph {
+    pub(crate) nodes: Vec<AnimationGraphNode>,
     pub(crate) active: usize,
 }
 
-impl<T: Animation> AnimationGraph<T> {
-    pub fn new(nodes: Vec<AnimationGraphNode<T>>) -> Self {
+impl AnimationGraph {
+    pub fn new(node_num: usize) -> Self {
         Self {
-            nodes,
+            nodes: {
+                let mut nodes = Vec::with_capacity(node_num);
+                for _ in 0..node_num {
+                    nodes.push(AnimationGraphNode::new());
+                }
+                nodes
+            },
             active: 0,
         }
     }
@@ -83,10 +85,6 @@ impl<T: Animation> AnimationGraph<T> {
             condition,
             neighbour_index: end_index,
         });
-    }
-
-    pub fn active_animation(&self) -> &T {
-        &self.nodes[self.active].value
     }
 
     pub(crate) fn set_active_node(&mut self, index: usize) {

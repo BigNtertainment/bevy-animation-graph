@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy_spritesheet_animation::{
     animation_graph::{AnimationTransitionCondition, AnimationTransitionMode},
     animation_manager::AnimationManager,
-    spritesheet_animation::{AnimationBounds, SpritesheetAnimation},
+    spritesheet_animation::{AnimationBounds, SpritesheetAnimationCollection, SpritesheetAnimation},
     AnimationGraphPlugin,
 };
 
@@ -30,15 +30,17 @@ fn setup(
 
     commands.spawn(Camera2dBundle::default());
 
+    let animation_collection = SpritesheetAnimationCollection::new(vec![
+        // Idle
+        SpritesheetAnimation::new(AnimationBounds::new(0, 3), Duration::from_millis(500)),
+        // Climbing
+        SpritesheetAnimation::new(AnimationBounds::new(5, 6), Duration::from_millis(300)),
+        // Jumping
+        SpritesheetAnimation::new(AnimationBounds::new(7, 8), Duration::from_millis(500)),
+    ]);
+
     let mut animation_manager = AnimationManager::new(
-        vec![
-            // Idle
-            SpritesheetAnimation::new(AnimationBounds::new(0, 3), Duration::from_millis(500)),
-            // Climbing
-            SpritesheetAnimation::new(AnimationBounds::new(5, 6), Duration::from_millis(300)),
-            // Jumping
-            SpritesheetAnimation::new(AnimationBounds::new(7, 8), Duration::from_millis(500)),
-        ],
+        animation_collection.animations.len(),
         0,
     );
 
@@ -81,12 +83,13 @@ fn setup(
             sprite: TextureAtlasSprite::new(0),
             ..default()
         },
+        animation_collection,
         animation_manager,
     ));
 }
 
 fn climbing(
-    mut player_query: Query<&mut AnimationManager<SpritesheetAnimation>>,
+    mut player_query: Query<&mut AnimationManager>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     let mut animation_manager = player_query.single_mut();
@@ -96,7 +99,7 @@ fn climbing(
 }
 
 fn jumping(
-    mut player_query: Query<&mut AnimationManager<SpritesheetAnimation>>,
+    mut player_query: Query<&mut AnimationManager>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     let mut animation_manager = player_query.single_mut();
