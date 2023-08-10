@@ -9,7 +9,7 @@ pub struct SpritesheetAnimationPlugin;
 impl Plugin for SpritesheetAnimationPlugin {
     fn build(&self, app: &mut App) {
         app.register_animation::<SpritesheetAnimationCollection>()
-            .add_system(execute_spritesheet_animation);
+            .add_systems(Update, execute_spritesheet_animation);
     }
 }
 

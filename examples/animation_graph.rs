@@ -6,9 +6,9 @@ use bevy_spritesheet_animation::prelude::*;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(AnimationGraphPlugin)
-        .add_startup_system(setup)
-        .add_systems((climbing, jumping))
+        .add_plugins(AnimationGraphPlugin)
+        .add_systems(Startup, setup)
+        .add_systems(Update, (climbing, jumping))
         .run();
 }
 

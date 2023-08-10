@@ -12,8 +12,8 @@ pub struct AnimationGraphPlugin;
 
 impl Plugin for AnimationGraphPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(AnimationManagerPlugin)
-            .add_plugin(AnimationCollectionPlugin);
+        app.add_plugins(AnimationManagerPlugin)
+            .add_plugins(AnimationCollectionPlugin);
     }
 }
 

@@ -17,6 +17,6 @@ pub(crate) struct AnimationCollectionPlugin;
 impl Plugin for AnimationCollectionPlugin {
     fn build(&self, app: &mut App) {
         #[cfg(feature = "spritesheet_animation")]
-        app.add_plugin(SpritesheetAnimationPlugin);
+        app.add_plugins(SpritesheetAnimationPlugin);
     }
 }

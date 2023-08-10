@@ -8,7 +8,7 @@ pub trait AnimationAppExt {
 
 impl AnimationAppExt for App {
 	fn register_animation<T: AnimationCollection>(&mut self) -> &mut Self {
-		self.add_system(transition_animations::<T>);
+		self.add_systems(Update, transition_animations::<T>);
 		self
 	}
 }
