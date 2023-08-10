@@ -8,6 +8,10 @@ edition = "2021"
 [dependencies]
 bevy = "0.10"
 
+[features]
+default = ["spritesheet_animation"]
+spritesheet_animation = []
+
 [[example]]
 name = "simple_animation"
 path = "examples/simple_animation.rs"

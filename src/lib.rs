@@ -1,5 +1,6 @@
 use animation_manager::AnimationManagerPlugin;
 use bevy::prelude::*;
+#[cfg(feature = "spritesheet_animation")]
 use spritesheet_animation::SpritesheetAnimationPlugin;
 
 pub mod animation_collection;
@@ -8,14 +9,17 @@ pub mod animation_graph;
 pub mod animation_app_ext;
 pub mod animation_bundle;
 
+#[cfg(feature = "spritesheet_animation")]
 pub mod spritesheet_animation;
 
 pub struct AnimationGraphPlugin;
 
 impl Plugin for AnimationGraphPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(AnimationManagerPlugin)
-            .add_plugin(SpritesheetAnimationPlugin);
+        app.add_plugin(AnimationManagerPlugin);
+
+        #[cfg(feature = "spritesheet_animation")]
+        app.add_plugin(SpritesheetAnimationPlugin);
     }
 }
 
@@ -28,9 +32,10 @@ pub mod prelude {
             AnimationTransitionMode,
         },
         animation_manager::AnimationManager,
-        spritesheet_animation::{
-            AnimationBounds, SpritesheetAnimation, SpritesheetAnimationCollection,
-            SpritesheetAnimationPlugin,
-        },
+    };
+    
+    #[cfg(feature = "spritesheet_animation")]
+    pub use crate::spritesheet_animation::{
+        AnimationBounds, SpritesheetAnimation, SpritesheetAnimationCollection,
     };
 }
