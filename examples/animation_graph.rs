@@ -34,10 +34,7 @@ fn setup(
         SpritesheetAnimation::new(AnimationBounds::new(7, 8), Duration::from_millis(500)),
     ]);
 
-    let mut animation_manager = AnimationManager::new(
-        animation_collection.animations.len(),
-        0,
-    );
+    let mut animation_manager = AnimationManager::new(animation_collection.animations.len(), 0);
 
     animation_manager.add_state("climbing".to_string(), false);
     animation_manager.add_state("jumping".to_string(), false);
@@ -83,20 +80,14 @@ fn setup(
     ));
 }
 
-fn climbing(
-    mut player_query: Query<&mut AnimationManager>,
-    keyboard_input: Res<Input<KeyCode>>,
-) {
+fn climbing(mut player_query: Query<&mut AnimationManager>, keyboard_input: Res<Input<KeyCode>>) {
     let mut animation_manager = player_query.single_mut();
     animation_manager
         .set_state("climbing".to_string(), keyboard_input.pressed(KeyCode::W))
         .unwrap();
 }
 
-fn jumping(
-    mut player_query: Query<&mut AnimationManager>,
-    keyboard_input: Res<Input<KeyCode>>,
-) {
+fn jumping(mut player_query: Query<&mut AnimationManager>, keyboard_input: Res<Input<KeyCode>>) {
     let mut animation_manager = player_query.single_mut();
     animation_manager
         .set_state(

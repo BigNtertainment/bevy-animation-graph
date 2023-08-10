@@ -30,10 +30,7 @@ impl AnimationManager {
     pub fn new(node_num: usize, start_node: usize) -> Self {
         let mut graph = AnimationGraph::new(node_num);
 
-        assert!(
-            start_node < node_num,
-            "start node index is out of bounds"
-        );
+        assert!(start_node < node_num, "start node index is out of bounds");
 
         graph.set_active_node(start_node);
 

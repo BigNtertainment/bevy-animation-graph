@@ -49,9 +49,7 @@ pub(crate) struct AnimationGraphNode {
 
 impl AnimationGraphNode {
     pub fn new() -> Self {
-        Self {
-            edges: vec![],
-        }
+        Self { edges: vec![] }
     }
 }
 

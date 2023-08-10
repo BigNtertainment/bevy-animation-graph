@@ -2,14 +2,20 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use crate::{animation_app_ext::AnimationAppExt, animation_collection::AnimationCollection, animation_bundle::AnimationBundle};
+use crate::{
+    animation_app_ext::AnimationAppExt, animation_bundle::AnimationBundle,
+    animation_collection::AnimationCollection, AnimationGraph,
+};
 
 pub struct SpritesheetAnimationPlugin;
 
 impl Plugin for SpritesheetAnimationPlugin {
     fn build(&self, app: &mut App) {
         app.register_animation::<SpritesheetAnimationCollection>()
-            .add_systems(Update, execute_spritesheet_animation);
+            .add_systems(
+                Update,
+                execute_spritesheet_animation.in_set(AnimationGraph::Execute),
+            );
     }
 }
 
@@ -65,10 +71,7 @@ impl SpritesheetAnimationCollection {
             animations,
             current_animation_index: 0,
             current_frame_index: 0,
-            frame_timer: Timer::new(
-                frame_timer_duration,
-                TimerMode::Repeating,
-            ),
+            frame_timer: Timer::new(frame_timer_duration, TimerMode::Repeating),
         }
     }
 
