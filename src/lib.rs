@@ -18,3 +18,19 @@ impl Plugin for AnimationGraphPlugin {
             .add_plugin(SpritesheetAnimationPlugin);
     }
 }
+
+pub mod prelude {
+    pub use crate::{
+        animation_app_ext::AnimationAppExt,
+        animation_bundle::AnimationBundle,
+        animation_graph::{
+            AnimationGraph, AnimationTransitionCondition,
+            AnimationTransitionMode,
+        },
+        animation_manager::AnimationManager,
+        spritesheet_animation::{
+            AnimationBounds, SpritesheetAnimation, SpritesheetAnimationCollection,
+            SpritesheetAnimationPlugin,
+        },
+    };
+}

@@ -29,7 +29,7 @@ impl AnimationTransitionCondition {
     }
 }
 
-pub struct AnimationGraphEdge {
+pub(crate) struct AnimationGraphEdge {
     pub(crate) condition: AnimationTransitionCondition,
     pub(crate) neighbour_index: usize,
 }
@@ -43,7 +43,7 @@ impl Debug for AnimationGraphEdge {
 }
 
 #[derive(Debug, Default)]
-pub struct AnimationGraphNode {
+pub(crate) struct AnimationGraphNode {
     pub(crate) edges: Vec<AnimationGraphEdge>,
 }
 
