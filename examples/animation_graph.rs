@@ -1,12 +1,7 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
-use bevy_spritesheet_animation::{
-    animation_graph::{AnimationTransitionCondition, AnimationTransitionMode},
-    animation_manager::AnimationManager,
-    spritesheet_animation::{AnimationBounds, SpritesheetAnimationCollection, SpritesheetAnimation},
-    AnimationGraphPlugin,
-};
+use bevy_spritesheet_animation::prelude::*;
 
 fn main() {
     App::new()
