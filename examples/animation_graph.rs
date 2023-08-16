@@ -1,3 +1,7 @@
+//! This example shows how to use the animation graph to create a simple state machine for a spritesheet animation.
+//! 
+//! Press W to climb, Space to jump.
+
 use std::time::Duration;
 
 use bevy::prelude::*;

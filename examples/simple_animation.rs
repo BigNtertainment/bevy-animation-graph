@@ -1,3 +1,5 @@
+//! A simple looping animation
+
 use std::time::Duration;
 
 use bevy::prelude::*;
