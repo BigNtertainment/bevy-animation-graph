@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
-use bevy_spritesheet_animation::prelude::*;
+use bevy_animation_graph::prelude::*;
 
 fn main() {
     App::new()

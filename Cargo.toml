@@ -1,5 +1,5 @@
 [package]
-name = "bevy-spritesheet-animation"
+name = "bevy-animation-graph"
 version = "0.1.0"
 edition = "2021"
 
